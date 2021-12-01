@@ -19,6 +19,9 @@ import MenuBuilder from './menu';
 import { resolveHtmlPath } from './util';
 
 const { spawn, exec } = require('child_process');
+const Store = require('electron-store');
+
+Store.initRenderer();
 
 export default class AppUpdater {
   constructor() {
@@ -30,6 +33,16 @@ export default class AppUpdater {
 
 let mainWindow: BrowserWindow | null = null;
 
+ipcMain.on('login', (event: any, arg: any) => {
+  if (arg === 'connect') {
+    event.reply('login', true);
+  }
+
+  if (arg === 'disconnect') {
+    event.reply('login', false);
+  }
+});
+
 ipcMain.on('start-bot', async (event: any, arg: any) => {
   console.log(arg);
   try {
@@ -39,11 +52,13 @@ ipcMain.on('start-bot', async (event: any, arg: any) => {
     );
     event.reply('start-bot', { pid: thread.pid });
     thread.stdout.on('data', function (data: any) {
-      if (typeof data !== 'undefined') {
-        console.log(data.toString());
-        event.reply('bot-messages', data.toString());
-      }
-      console.log(data.toString());
+      setTimeout(() => {
+        if (typeof data !== 'undefined') {
+          console.log(data.toString());
+          event.reply('bot-messages', data.toString());
+          console.log(data.toString());
+        }
+      }, 2000);
     });
   } catch (err) {
     console.log(err);

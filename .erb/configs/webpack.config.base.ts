@@ -43,6 +43,7 @@ export default {
       constants: require.resolve("constants-browserify"),
       stream: require.resolve("stream-browserify"),
       fs: require.resolve("graceful-fs"),
+      crypto: require.resolve("crypto-browserify")
 		},
 
   },

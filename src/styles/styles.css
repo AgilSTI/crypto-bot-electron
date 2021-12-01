@@ -144,12 +144,22 @@
   border: none;
   border-radius: 4px;
   color: #e5e5e5;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  font-size: 10px;
+}
+
+:root {
+  --clr-background: #212121;
+  --clr-surface: #23272a;
+  --clr-text-input: #7289da;
 }
 
 body {
   font-family: "Kanit", sans-serif;
   background-size: cover;
-  background-color: white;
+  background-color: var(--clr-background);
   box-sizing: border-box;
   padding: 0;
   margin: 0;
@@ -162,6 +172,10 @@ body {
   align-items: center;
   border-radius: 24px;
   position: relative;
+}
+body a {
+  text-decoration: none;
+  color: #e5e5e5;
 }
 @keyframes fadeInAnimation {
   0% {
@@ -219,9 +233,9 @@ body .notification-off {
   justify-content: center;
   align-items: center;
   flex-direction: column;
-  border: 0.5px solid #e7e3eb;
+  border: 0.5px solid #212121;
   width: 80%;
-  background-color: white;
+  background-color: var(--clr-surface);
   border-radius: 16px;
   padding: 8px 0px;
 }
@@ -234,7 +248,7 @@ body .notification-off {
   justify-content: center;
   align-items: center;
   flex-direction: column;
-  background-color: #eeeaf4;
+  background-color: #212121;
 }
 .home .input-group input {
   border: none;
@@ -244,6 +258,7 @@ body .notification-off {
   height: 32px;
   min-width: 90%;
   outline: none;
+  color: var(--clr-text-input);
 }
 .home .input-group label {
   border-top-right-radius: 4px;
@@ -252,15 +267,15 @@ body .notification-off {
   font-size: 12px;
   min-width: 90%;
   background-color: transparent;
-  color: #7209b7;
+  color: #c5c5c5;
 }
 .home .input-group button {
-  width: 90%;
+  width: 95%;
   color: white;
   -webkit-box-align: center;
   align-items: center;
   border: 0px;
-  border-radius: 16px;
+  border-radius: 8px;
   box-shadow: rgba(14, 14, 44, 0.4) 0px -1px 0px 0px inset;
   cursor: pointer;
   display: inline-flex;
@@ -275,7 +290,7 @@ body .notification-off {
   outline: 0px;
   transition: background-color 0.2s ease 0s, opacity 0.2s ease 0s;
   height: 48px;
-  background-color: #4cc9f0;
+  background-color: #7289da;
 }
 .home .input-group p {
   color: #7a6eaa;
@@ -283,7 +298,7 @@ body .notification-off {
 
 ::placeholder {
   /* Chrome, Firefox, Opera, Safari 10.1+ */
-  color: #180227;
+  color: #7289da;
   opacity: 1;
   /* Firefox */
   letter-spacing: 0.3px;
