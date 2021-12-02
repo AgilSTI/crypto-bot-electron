@@ -4,16 +4,10 @@ import { useEffect, useState } from 'react';
 import Container from '../Container';
 import factoryConfig from '../../factory/config.json'
 
-
-import botImg from '../../../assets/bot.svg';
-
+import botImg from '../../../assets/char.png';
 
 const fs = window.require('fs-extra');
 const { ipcRenderer } = window.require('electron');
-
-// const {shell} = window.require('electron');
-
-
 
 type ConfigProps = {
   start_delay: number;
@@ -28,17 +22,24 @@ type ConfigProps = {
   wait_for_page_refresh_delay: number;
 };
 
-export default function Start() {
+type StoreGet = (arg0: string) => { pid: number }
+type StoreSet = (arg0: string, arg1: { pid: number }) => void;
+
+type StartProps = {
+  store: {
+    get: StoreGet
+    set: StoreSet
+  },
+  token: string
+}
+
+export default function Start({ store, token }: StartProps) {
 
   const packageObj: ConfigProps = fs.readJsonSync('./config.json');
   const [config, setConfig] = useState(packageObj);
-  const [actualPage, setActualPage] = useState("settings")
+  const [actualPage, setActualPage] = useState("start")
   const [isRunning, setIsRunning] = useState(false);
-  const [pid, setPid] = useState("");
   const [actualAction, setActualAction] = useState("");
-  useEffect(() => {
-    console.log(pid);
-  }, [pid])
 
 
  async function saveConfig()  {
@@ -257,8 +258,10 @@ export default function Start() {
                   <button 
                   type="button"
                   onClick={async () => {
+                    const { pid } = store.get('pid');
                     ipcRenderer.send("stop-bot", pid);
                     setIsRunning(false);
+                    store.set('pid', { pid: 0});
                    
                   }}
                   >Stop</button>
@@ -266,10 +269,11 @@ export default function Start() {
                   <button 
                   type="button"
                   onClick={() => {
+                    console.log(token);
                     ipcRenderer.on("start-bot", (_, args) => {
-                      setPid(args.pid);
+                      store.set('pid', args)
                     });
-                    ipcRenderer.send("start-bot", "");
+                    ipcRenderer.send("start-bot", token);
                     setIsRunning(true);
                   }}
                   >Play</button>

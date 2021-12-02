@@ -1,31 +1,38 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable prettier/prettier */
 /* eslint-disable no-console */
 import { useEffect, useState } from 'react';
 import WebSocketWrapper from '../../components/websocketWrapper';
 import Start from './start';
+import api from '../../components/axios';
 
 const { ipcRenderer } = window.require('electron');
-// import api from '../../components/axios';
+const Store = window.require('electron-store');
+
+const store = new Store();
+store.set('pid', { pid: 0 });
+
+interface StartWrapperProps {
+  id: number,
+  token: string
+}
 
 
-export default function StartWrapper() {
+export default function StartWrapper({ id, token }: StartWrapperProps) {
   const [allowed, setAllowed] = useState(false);
 
-  // async function checkToken() {
-  //   try {
-  //     const token = localStorage.getItem("token");
-
-  //      await api.get("/token", {
-  //       headers: {
-  //         Authorization: `Bearer ${token}`
-  //       }
-  //     });
-
-
-  //   } catch (err) {
-
-  //   }
-  // }
+  async function checkToken(): Promise<boolean> {
+    try {
+       await api.get("/auth/check-token", {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      return true;
+    } catch (err) {
+      return false;
+    }
+  }
 
   function connectToWebSocket() {
     const ws = new WebSocket("ws://localhost:5555/ws");
@@ -43,24 +50,33 @@ export default function StartWrapper() {
       console.log(evt.data);
       if (evt.data === "access granted") {
         const subscription = {
-          ID: 5,
-          Token: "abcde"
+          ID: id,
+          Token: token
         }
         ws.send(JSON.stringify(subscription))
       } else if (evt.data === "connected with no restrictions") {
         setAllowed(true);
       } else if (evt.data === "found simultaneous connections for this id") {
-        ipcRenderer.send('login', 'disconnect');
+        (async () => {
+         const authorized = await checkToken();
+         if (authorized) {
+           setAllowed(true);
+         } else {
+          ws.close()
+         }
+        })()
       }
 
     }
 
     ws.onclose = () => {
-      console.log("connection closed")
-    }
-
-    ws.onerror = (evt) => {
-      console.log("error: ", evt)
+      const { pid } = store.get('pid');
+      if (pid !== 0) {
+        console.log('o pid é ', pid);
+        ipcRenderer.send("stop-bot", pid);
+      }
+    ipcRenderer.send('multiple-logins', true);
+    ipcRenderer.send('login', 'disconnect');
     }
 
   }
@@ -69,10 +85,11 @@ export default function StartWrapper() {
     connectToWebSocket();
   }, []);
 
+
   if (allowed) {
     return (
       <WebSocketWrapper>
-        <Start />
+        <Start store={store} token={token} />
       </WebSocketWrapper>
     );
   }

@@ -14,6 +14,7 @@ import path from 'path';
 import { app, BrowserWindow, shell, ipcMain } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
+import fs from 'fs-extra';
 
 import MenuBuilder from './menu';
 import { resolveHtmlPath } from './util';
@@ -33,6 +34,12 @@ export default class AppUpdater {
 
 let mainWindow: BrowserWindow | null = null;
 
+ipcMain.on('multiple-logins', (event: any, arg: boolean) => {
+  if (arg === true) {
+    event.reply('multiple-logins', arg);
+  }
+});
+
 ipcMain.on('login', (event: any, arg: any) => {
   if (arg === 'connect') {
     event.reply('login', true);
@@ -43,12 +50,38 @@ ipcMain.on('login', (event: any, arg: any) => {
   }
 });
 
-ipcMain.on('start-bot', async (event: any, arg: any) => {
-  console.log(arg);
+ipcMain.on('start-bot', async (event: any, arg: string) => {
+  type ConfigProps = {
+    start_delay: number;
+    heroes_page_first_action_delay: number;
+    treasure_hunt_first_action_delay: number;
+    after_sent_to_work_delay: number;
+    after_close_heroes_page_delay: number;
+    check_for_heroes_able_to_work_delay: number;
+    after_click_metamask_sign_blue_btn_delay: number;
+    after_click_metamask_connect_delay: number;
+    after_click_connect_orange_btn_delay: number;
+    wait_for_page_refresh_delay: number;
+  };
+
+  const config: ConfigProps = fs.readJsonSync('./config.json');
+  const args: Array<string> = [
+    config.start_delay.toString(),
+    config.heroes_page_first_action_delay.toString(),
+    config.treasure_hunt_first_action_delay.toString(),
+    config.after_sent_to_work_delay.toString(),
+    config.after_close_heroes_page_delay.toString(),
+    config.check_for_heroes_able_to_work_delay.toString(),
+    config.after_click_metamask_sign_blue_btn_delay.toString(),
+    config.after_click_metamask_connect_delay.toString(),
+    config.after_click_connect_orange_btn_delay.toString(),
+    config.wait_for_page_refresh_delay.toString(),
+    arg,
+  ];
   try {
     const thread = spawn(
       'C:\\Users\\duduc\\Desktop\\crypto-bot\\target\\release\\template.exe',
-      ['3', '3', '5', '2', '5', '600', '10', '20', '5']
+      args
     );
     event.reply('start-bot', { pid: thread.pid });
     thread.stdout.on('data', function (data: any) {
@@ -72,7 +105,7 @@ ipcMain.on('stop-bot', (event: any, arg: any) => {
         throw err;
       }
 
-      event.reply('start-bot', stdout);
+      event.reply('bot-messages', 'bot stopped');
       console.log('stdout', stdout);
       console.log('stderr', stderr);
     });
@@ -138,6 +171,7 @@ const createWindow = async () => {
     autoHideMenuBar: true,
     icon: getAssetPath('icon.png'),
     webPreferences: {
+      webSecurity: true,
       nodeIntegration: true,
       contextIsolation: false,
       preload: path.join(__dirname, 'preload.js'),
