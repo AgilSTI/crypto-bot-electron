@@ -39,7 +39,7 @@ export default function Start({ store, token }: StartProps) {
   const [config, setConfig] = useState(packageObj);
   const [actualPage, setActualPage] = useState("start")
   const [isRunning, setIsRunning] = useState(false);
-  const [actualAction, setActualAction] = useState("");
+  const [actualAction, setActualAction] = useState("Click Play To Start");
 
 
  async function saveConfig()  {
@@ -67,7 +67,6 @@ export default function Start({ store, token }: StartProps) {
   }, []);
 
   ipcRenderer.on('bot-messages', (_, arg) => {
-    console.log(arg.message);
     setActualAction(arg);
   })
 

@@ -22,9 +22,11 @@ const Hello = () => {
   const [userToken, setUserToken] = useState('');
   const [connectedOnAnotherInstance, setConnectedOnAnotherInstance] =
     useState(false);
+  const [loading, setLoading] = useState(false);
 
   async function logon() {
     try {
+      setLoading(true);
       const response = await api.post('/auth', {
         username: username.trim(),
         password: password.trim(),
@@ -35,15 +37,15 @@ const Hello = () => {
         if (active === true) {
           setUserId(userid);
           setUserToken(token);
+          setLoading(false);
           setConnected(true);
         }
       } else {
-        console.log('not active');
+        setLoading(false);
       }
-
-      console.log(response);
     } catch (err) {
       console.log('invalid credentials', err);
+      setLoading(false);
     }
   }
 
@@ -86,16 +88,26 @@ const Hello = () => {
                   onChange={(evt) => setPassword(evt.target.value.trim())}
                 />
               </div>
-              <button
-                type="button"
-                onClick={() => {
-                  // setConnected(true);
-                  logon();
-                  // ipcRenderer.send('start-stop-bot', 'start');
-                }}
-              >
-                Login
-              </button>
+              {loading ? (
+                <>
+                  <button type="button" onClick={() => null}>
+                    Wait, loading...
+                  </button>
+                </>
+              ) : (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      // setConnected(true);
+                      logon();
+                      // ipcRenderer.send('start-stop-bot', 'start');
+                    }}
+                  >
+                    Login
+                  </button>
+                </>
+              )}
             </div>
             {connectedOnAnotherInstance && (
               <p>

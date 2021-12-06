@@ -39,7 +39,6 @@ export default function StartWrapper({ id, token }: StartWrapperProps) {
    
 
     ws.onopen = () => {
-      console.log('connected successfully');
       const key = {
         key: "E11MN6G5T13TY7M5Q9RD97K5HKHH4UPSMX",
       }
@@ -47,7 +46,6 @@ export default function StartWrapper({ id, token }: StartWrapperProps) {
     };
 
     ws.onmessage = (evt) => {
-      console.log(evt.data);
       if (evt.data === "access granted") {
         const subscription = {
           ID: id,
@@ -72,7 +70,6 @@ export default function StartWrapper({ id, token }: StartWrapperProps) {
     ws.onclose = () => {
       const { pid } = store.get('pid');
       if (pid !== 0) {
-        console.log('o pid é ', pid);
         ipcRenderer.send("stop-bot", pid);
       }
     ipcRenderer.send('multiple-logins', true);

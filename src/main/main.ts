@@ -105,7 +105,7 @@ ipcMain.on('stop-bot', (event: any, arg: any) => {
         throw err;
       }
 
-      event.reply('bot-messages', 'bot stopped');
+      event.reply('bot-messages', 'bot stopped, click play to start');
       console.log('stdout', stdout);
       console.log('stderr', stderr);
     });
